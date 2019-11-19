@@ -1,0 +1,89 @@
+// These arguments were used when this file was generated. They will be automatically applied on subsequent loads 
+// via the GUI or CLI invocations. Run CLI with '--help' for additional information on how to override these arguments.
+// @cliArgs --board "/ti/boards/MSP_EXP432P401R" --product "simplelink_msp432p4_sdk@3.30.00.13"
+// @versions {"data":"2019051709","timestamp":"2019051709","tool":"1.1.792","templates":"2019051709"}
+
+var RTOS = scripting.addModule("/ti/drivers/RTOS");
+var PWM = scripting.addModule("/ti/drivers/PWM");
+var PWM1 = PWM.addInstance();
+var Button = scripting.addModule("/ti/drivers/apps/Button");
+var Button1 = Button.addInstance();
+var Button2 = Button.addInstance();
+var PWM2 = PWM.addInstance();
+var ADC = scripting.addModule("/ti/drivers/ADC");
+var ADC1 = ADC.addInstance();
+var LED = scripting.addModule("/ti/drivers/apps/LED");
+var LED1 = LED.addInstance();
+// Name
+RTOS.timer0.resource.$name = "MyTIMER_A1";
+// Name - The C/C++ identifier used in applications as the index parameter passed to PWM runtime APIs
+PWM1.$name = "CONFIG_PWM_0";
+// Name
+PWM1.timer.$name = "MyTIMER_A1";
+// Assign pin
+PWM1.timer.pwmPin.$assign = "boosterpack.40"; // P2.7
+var Power = scripting.addModule("/ti/drivers/Power");
+// Name
+Power.performanceLevel3.$name = "ti_drivers_power_PowerMSP432PerfLevels0";
+// Name
+Power.performanceLevel2.$name = "ti_drivers_power_PowerMSP432PerfLevels1";
+// Name
+Power.performanceLevel1.$name = "ti_drivers_power_PowerMSP432PerfLevels2";
+// Name
+Power.performanceLevel0.$name = "ti_drivers_power_PowerMSP432PerfLevels3";
+var Board = scripting.addModule("/ti/drivers/Board");
+var DriverLib = scripting.addModule("/ti/devices/DriverLib");
+// Name - The C/C++ identifier used in applications as the index parameter passed to Button runtime APIs
+Button1.$name = "CONFIG_BUTTON_0";
+// Use Hardware - Select the hardware to use, or 'none' to use available header pins
+Button1.$hardware = system.deviceData.board.components.S1;
+// Name - The C/C++ identifier used in applications as the index parameter passed to GPIO runtime APIs
+Button1.gpioPin.$name = "CONFIG_GPIO_0";
+// Pull - Specifies the internal pull-up or pull-down resistor configuration of this GPIO pin.
+Button1.gpioPin.pull = "Pull Up";
+// Interrupt Trigger - Specifies when or if interrupts are triggered
+Button1.gpioPin.interruptTrigger = "Falling Edge";
+// Name - The C/C++ identifier used in applications as the index parameter passed to Button runtime APIs
+Button2.$name = "CONFIG_BUTTON_1";
+// Use Hardware - Select the hardware to use, or 'none' to use available header pins
+Button2.$hardware = system.deviceData.board.components.S2;
+// Name - The C/C++ identifier used in applications as the index parameter passed to GPIO runtime APIs
+Button2.gpioPin.$name = "CONFIG_GPIO_1";
+// Pull - Specifies the internal pull-up or pull-down resistor configuration of this GPIO pin.
+Button2.gpioPin.pull = "Pull Up";
+// Interrupt Trigger - Specifies when or if interrupts are triggered
+Button2.gpioPin.interruptTrigger = "Falling Edge";
+// Name - The C/C++ identifier used in applications as the index parameter passed to PWM runtime APIs
+PWM2.$name = "CONFIG_PWM_1";
+// Name
+PWM2.timer.$name = "MyTIMER_A1";
+// Assign pin
+PWM2.timer.pwmPin.$assign = "boosterpack.3"; // P3.2
+// Name - The C/C++ identifier used in applications as the index parameter passed to ADC runtime APIs
+ADC1.$name = "CONFIG_ADC_0";
+// Name
+ADC1.adc.$name = "MyADC141";
+// Assign pin
+ADC1.adc.adcPin.$assign = "boosterpack.23"; // P6.1
+// Name - The C/C++ identifier used in applications as the index parameter passed to LED runtime APIs
+LED1.$name = "CONFIG_LED_0";
+// Use Hardware - Select the hardware to use, or 'none' to use available header pins
+LED1.$hardware = system.deviceData.board.components.LED2_BLUE;
+// Mode - Select the GPIO mode
+LED1.gpioPin.mode = "Output";
+// Callback Function - The name of the callback function called when this GPIO pin triggers an interrupt, or 'NULL' if it's specified at runtime
+LED1.gpioPin.callbackFunction = "";
+// Suggest solution
+RTOS.timer0.resource.$suggestSolution = "Timer_A0";
+// Suggest solution
+PWM1.timer.$suggestSolution = "Timer_A1";
+// Suggest solution
+Button1.gpioPin.gpioPin.$suggestSolution = "5";
+// Suggest solution
+Button2.gpioPin.gpioPin.$suggestSolution = "8";
+// Suggest solution
+PWM2.timer.$suggestSolution = "Timer_A1";
+// Suggest solution
+ADC1.adc.$suggestSolution = "ADC14";
+// Suggest solution
+LED1.gpioPin.gpioPin.$suggestSolution = "18";
