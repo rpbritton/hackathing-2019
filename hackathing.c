@@ -34,18 +34,26 @@
  *  ======== hackathing.c ========
  */
 
-/* Standard Libraries. */
+/* Standard header files. */
 #include <unistd.h>
 #include <stdint.h>
 #include <stddef.h>
 
-/* Driver Header files */
+/* TI-RTOS header files. */
+#include <ti/sysbios/BIOS.h>
+#include <ti/sysbios/knl/Clock.h>
+#include <ti/sysbios/knl/Task.h>
+
+/* Driver header files. */
 #include <ti/drivers/GPIO.h>
 #include <ti/drivers/ADC.h>
 #include <ti/drivers/PWM.h>
 
-/* Driver configuration */
+/* Driver configuration. */
 #include "ti_drivers_config.h"
+
+/* Definitions. */
+#define LOOP_DELAY      ( 5 * (Clock_tickPeriod / 1000) )
 
 /*
  *  ======== mainThread ========
@@ -88,6 +96,8 @@ void *mainThread(void *arg0)
     int gateCounter = 75000;
     int rollerCounter = 0;
     while (1) {
+        uint32_t loopStart = Clock_getTicks();
+
         uint16_t adc0Value;
         int_fast16_t adc0Res = ADC_convert(adc0, &adc0Value);
         if (adc0Res == ADC_STATUS_SUCCESS) {
@@ -119,5 +129,11 @@ void *mainThread(void *arg0)
             rollerCounter = 0;
         }
         rollerCounter++;
+
+        uint32_t loopLength = Clock_getTicks() - loopStart;
+        if (loopLength > LOOP_DELAY) {
+            // TODO: overrun
+        }
+        Task_sleep(LOOP_DELAY - loopLength);
     }
 }
