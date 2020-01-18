@@ -11,6 +11,7 @@ var GPIO1 = GPIO.addInstance();
 var PWM = scripting.addModule("/ti/drivers/PWM");
 var PWM1 = PWM.addInstance();
 var PWM2 = PWM.addInstance();
+var GPIO2 = GPIO.addInstance();
 // Name
 RTOS.timer0.resource.$name = "MyTIMER_A1";
 // Name - The C/C++ identifier used in applications as the index parameter passed to ADC runtime APIs
@@ -46,6 +47,10 @@ PWM2.$name = "CONFIG_PWM_1";
 PWM2.timer.$name = "MyTIMER_A1";
 // Assign pin
 PWM2.timer.pwmPin.$assign = "boosterpack.4"; // P3.3
+// Name - The C/C++ identifier used in applications as the index parameter passed to GPIO runtime APIs
+GPIO2.$name = "CONFIG_GPIO_1";
+// Use Hardware - Select the hardware to use, or 'none' to use available header pins
+GPIO2.$hardware = system.deviceData.board.components.LED2_RED;
 // Suggest solution
 RTOS.timer0.resource.$suggestSolution = "Timer_A0";
 // Suggest solution
@@ -56,3 +61,5 @@ GPIO1.gpioPin.$suggestSolution = "18";
 PWM1.timer.$suggestSolution = "Timer_A1";
 // Suggest solution
 PWM2.timer.$suggestSolution = "Timer_A1";
+// Suggest solution
+GPIO2.gpioPin.$suggestSolution = "16";

@@ -53,7 +53,14 @@
 #include "ti_drivers_config.h"
 
 /* Definitions. */
-#define LOOP_DELAY      ( 5 * (Clock_tickPeriod / 1000) )
+#define LOOP_DELAY   ( 5 )
+#define LOOP_DELAY_TICKS    ( LOOP_DELAY * (Clock_tickPeriod / 1000) )
+
+#define GATE_TOTAL          ( 4000 / LOOP_DELAY )
+#define GATE_ENABLE         ( 200 / LOOP_DELAY )
+
+#define ROLLER_TOTAL        ( 1000 / LOOP_DELAY )
+#define ROLLER_ENABLE       ( ROLLER_TOTAL * 0.5 )
 
 /*
  *  ======== mainThread ========
@@ -93,7 +100,7 @@ void *mainThread(void *arg0)
     PWM_start(pwm0);
     PWM_start(pwm1);
 
-    int gateCounter = 75000;
+    int gateCounter = 0;
     int rollerCounter = 0;
     while (1) {
         uint32_t loopStart = Clock_getTicks();
@@ -102,38 +109,41 @@ void *mainThread(void *arg0)
         int_fast16_t adc0Res = ADC_convert(adc0, &adc0Value);
         if (adc0Res == ADC_STATUS_SUCCESS) {
             if (adc0Value < 6000) {
-                if (gateCounter > 0) {
-                    gateCounter--;
+                if (gateCounter < GATE_TOTAL) {
+                    gateCounter++;
                 }
                 GPIO_write(CONFIG_GPIO_0, 1);
             }
             else {
-                if (gateCounter < 100000) {
-                    gateCounter++;
+                if (gateCounter > 0) {
+                    gateCounter--;
                 }
                 GPIO_write(CONFIG_GPIO_0, 0);
             }
         }
-
-        if (gateCounter < 98000) {
-            PWM_setDuty(pwm0, 0);
-        } else {
+        if (gateCounter < GATE_ENABLE) {
             PWM_setDuty(pwm0, PWM_DUTY_FRACTION_MAX * 1);
+        } else {
+            PWM_setDuty(pwm0, 0);
         }
 
-        if (rollerCounter < 10000) {
-            PWM_setDuty(pwm1, PWM_DUTY_FRACTION_MAX * 0);
-        } else if (rollerCounter < 25000) {
+        rollerCounter++;
+        if (rollerCounter < ROLLER_ENABLE) {
             PWM_setDuty(pwm1, PWM_DUTY_FRACTION_MAX * 0.9);
+        } else if (rollerCounter < ROLLER_TOTAL) {
+            PWM_setDuty(pwm1, PWM_DUTY_FRACTION_MAX * 0);
         } else {
             rollerCounter = 0;
         }
-        rollerCounter++;
 
         uint32_t loopLength = Clock_getTicks() - loopStart;
-        if (loopLength > LOOP_DELAY) {
-            // TODO: overrun
+
+        if (loopLength > LOOP_DELAY_TICKS) {
+            GPIO_write(CONFIG_GPIO_1, 1);
+        } else {
+            GPIO_write(CONFIG_GPIO_1, 0);
         }
-        Task_sleep(LOOP_DELAY - loopLength);
+
+        Task_sleep(LOOP_DELAY_TICKS - loopLength);
     }
 }
