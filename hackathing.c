@@ -118,13 +118,13 @@ void *mainThread(void *arg0)
         if (gateCounter < 98000) {
             PWM_setDuty(pwm0, 0);
         } else {
-            PWM_setDuty(pwm0, PWM_DUTY_FRACTION_MAX * 0.9);
+            PWM_setDuty(pwm0, PWM_DUTY_FRACTION_MAX * 1);
         }
 
-        if (rollerCounter < 20000) {
+        if (rollerCounter < 10000) {
             PWM_setDuty(pwm1, PWM_DUTY_FRACTION_MAX * 0);
         } else if (rollerCounter < 25000) {
-            PWM_setDuty(pwm1, PWM_DUTY_FRACTION_MAX * 0.7);
+            PWM_setDuty(pwm1, PWM_DUTY_FRACTION_MAX * 0.9);
         } else {
             rollerCounter = 0;
         }
