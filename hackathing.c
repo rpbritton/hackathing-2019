@@ -56,11 +56,20 @@
 #define LOOP_DELAY   ( 5 )
 #define LOOP_DELAY_TICKS    ( LOOP_DELAY * (Clock_tickPeriod / 1000) )
 
-#define GATE_TOTAL          ( 4000 / LOOP_DELAY )
+#define GATE_TOTAL          ( 3000 / LOOP_DELAY )
 #define GATE_ENABLE         ( 200 / LOOP_DELAY )
 
-#define ROLLER_TOTAL        ( 1000 / LOOP_DELAY )
-#define ROLLER_ENABLE       ( ROLLER_TOTAL * 0.5 )
+#define ROLLER_TOTAL     ( 30000 / LOOP_DELAY )
+#define ROLLER_ENABLE    ( 1000 / LOOP_DELAY )
+
+#define ROLLER_TOGGLER_TOTAL     ( 1500 / LOOP_DELAY )
+#define ROLLER_TOGGLER_ENABLE    ( ROLLER_TOGGLER_TOTAL * 0.4 )
+
+#define GATE_SENSOR_LEVEL   ( 8000 )
+#define ROLLER_SENSOR_LEVEL ( 15000 )
+
+#define GATE_SPEED          ( 0.85 )
+#define ROLLER_SPEED        ( 0.9 )
 
 /*
  *  ======== mainThread ========
@@ -73,75 +82,114 @@ void *mainThread(void *arg0)
     /* ADC Driver. */
     ADC_init();
     /* ADC Params. */
-    ADC_Params adcParams;
-    ADC_Params_init(&adcParams);
+    ADC_Params gateSensorADCParams;
+    ADC_Params_init(&gateSensorADCParams);
+    ADC_Params rollerSensorADCParams;
+    ADC_Params_init(&rollerSensorADCParams);
     /* ADC Channels. */
-    ADC_Handle adc0 = ADC_open(CONFIG_ADC_0, &adcParams);
-    if (adc0 == NULL) {
+    ADC_Handle gateSensorADC = ADC_open(GATE_SENSOR_ADC, &gateSensorADCParams);
+    if (gateSensorADC == NULL) {
+        while (1) {}
+    }
+    ADC_Handle rollerSensorADC = ADC_open(ROLLER_SENSOR_ADC, &rollerSensorADCParams);
+    if (rollerSensorADC == NULL) {
         while (1) {}
     }
 
     /* PWM Driver. */
     PWM_init();
     /* PWM Params. */
-    PWM_Params pwm0Params;
-    PWM_Params_init(&pwm0Params);
-    PWM_Params pwm1Params;
-    PWM_Params_init(&pwm1Params);
+    PWM_Params gatePWMParams;
+    PWM_Params_init(&gatePWMParams);
+    PWM_Params rollerPWMParams;
+    PWM_Params_init(&rollerPWMParams);
     /* PWM Channels. */
-    PWM_Handle pwm0 = PWM_open(CONFIG_PWM_0, &pwm0Params);
-    if (pwm0 == NULL) {
+    PWM_Handle gatePWM = PWM_open(GATE_PWM, &gatePWMParams);
+    if (gatePWM == NULL) {
         while (1) {}
     }
-    PWM_Handle pwm1 = PWM_open(CONFIG_PWM_1, &pwm1Params);
-    if (pwm1 == NULL) {
+    PWM_Handle rollerPWM = PWM_open(ROLLER_PWM, &rollerPWMParams);
+    if (rollerPWM == NULL) {
         while (1) {}
     }
-    PWM_start(pwm0);
-    PWM_start(pwm1);
+    PWM_start(gatePWM);
+    PWM_start(rollerPWM);
 
     int gateCounter = 0;
     int rollerCounter = 0;
+    int rollerTogglerCounter = 0;
+
     while (1) {
         uint32_t loopStart = Clock_getTicks();
 
-        uint16_t adc0Value;
-        int_fast16_t adc0Res = ADC_convert(adc0, &adc0Value);
-        if (adc0Res == ADC_STATUS_SUCCESS) {
-            if (adc0Value < 6000) {
+        /*
+         * Gate Stuff.
+         */
+
+        uint16_t gateSensorADCValue;
+        int_fast16_t gateSensorADCRes = ADC_convert(gateSensorADC, &gateSensorADCValue);
+        if (gateSensorADCRes == ADC_STATUS_SUCCESS) {
+            if (gateSensorADCValue < GATE_SENSOR_LEVEL) {
                 if (gateCounter < GATE_TOTAL) {
                     gateCounter++;
                 }
-                GPIO_write(CONFIG_GPIO_0, 1);
+                GPIO_write(GATE_SENSOR_LED_BLUE, 1);
             }
             else {
                 if (gateCounter > 0) {
                     gateCounter--;
                 }
-                GPIO_write(CONFIG_GPIO_0, 0);
+                GPIO_write(GATE_SENSOR_LED_BLUE, 0);
             }
         }
         if (gateCounter < GATE_ENABLE) {
-            PWM_setDuty(pwm0, PWM_DUTY_FRACTION_MAX * 1);
+            PWM_setDuty(gatePWM, PWM_DUTY_FRACTION_MAX * GATE_SPEED);
+            GPIO_write(PICKUP_NOW_PIN, 0);
         } else {
-            PWM_setDuty(pwm0, 0);
+            PWM_setDuty(gatePWM, 0);
+            GPIO_write(PICKUP_NOW_PIN, 1);
         }
 
-        rollerCounter++;
-        if (rollerCounter < ROLLER_ENABLE) {
-            PWM_setDuty(pwm1, PWM_DUTY_FRACTION_MAX * 0.9);
-        } else if (rollerCounter < ROLLER_TOTAL) {
-            PWM_setDuty(pwm1, PWM_DUTY_FRACTION_MAX * 0);
-        } else {
-            rollerCounter = 0;
+        /*
+         * Roller Stuff.
+         */
+
+        uint16_t rollerSensorADCValue;
+        int_fast16_t rollerSensorADCRes = ADC_convert(rollerSensorADC, &rollerSensorADCValue);
+        if (rollerSensorADCRes == ADC_STATUS_SUCCESS) {
+            if (rollerSensorADCValue < ROLLER_SENSOR_LEVEL) {
+                if (rollerCounter < ROLLER_TOTAL) {
+                    rollerCounter++;
+                }
+                GPIO_write(ROLLER_SENSOR_LED_GREEN, 1);
+            }
+            else {
+                if (rollerCounter > 0) {
+                    rollerCounter--;
+                }
+                GPIO_write(ROLLER_SENSOR_LED_GREEN, 0);
+            }
         }
+        rollerTogglerCounter++;
+        if (rollerCounter < ROLLER_ENABLE && rollerTogglerCounter < ROLLER_TOGGLER_ENABLE) {
+            PWM_setDuty(rollerPWM, PWM_DUTY_FRACTION_MAX * GATE_SPEED);
+        } else {
+            PWM_setDuty(rollerPWM, 0);
+        }
+        if (rollerTogglerCounter > ROLLER_TOGGLER_TOTAL) {
+            rollerTogglerCounter = 0;
+        }
+
+        /*
+         * Loop Timing Stuff.
+         */
 
         uint32_t loopLength = Clock_getTicks() - loopStart;
 
         if (loopLength > LOOP_DELAY_TICKS) {
-            GPIO_write(CONFIG_GPIO_1, 1);
+            GPIO_write(OVERRUN_LED_RED, 1);
         } else {
-            GPIO_write(CONFIG_GPIO_1, 0);
+            GPIO_write(OVERRUN_LED_RED, 0);
         }
 
         Task_sleep(LOOP_DELAY_TICKS - loopLength);

@@ -12,10 +12,13 @@ var PWM = scripting.addModule("/ti/drivers/PWM");
 var PWM1 = PWM.addInstance();
 var PWM2 = PWM.addInstance();
 var GPIO2 = GPIO.addInstance();
+var GPIO3 = GPIO.addInstance();
+var ADC2 = ADC.addInstance();
+var GPIO4 = GPIO.addInstance();
 // Name
 RTOS.timer0.resource.$name = "MyTIMER_A1";
 // Name - The C/C++ identifier used in applications as the index parameter passed to ADC runtime APIs
-ADC1.$name = "CONFIG_ADC_0";
+ADC1.$name = "GATE_SENSOR_ADC";
 // Name
 ADC1.adc.$name = "MyADC141";
 // Assign pin
@@ -31,26 +34,42 @@ Power.performanceLevel1.$name = "ti_drivers_power_PowerMSP432PerfLevels2";
 Power.performanceLevel0.$name = "ti_drivers_power_PowerMSP432PerfLevels3";
 var Board = scripting.addModule("/ti/drivers/Board");
 var DriverLib = scripting.addModule("/ti/devices/DriverLib");
-// Name - The C/C++ identifier used in applications as the index parameter passed to GPIO runtime APIs
-GPIO1.$name = "CONFIG_GPIO_0";
 // Use Hardware - Select the hardware to use, or 'none' to use available header pins
 GPIO1.$hardware = system.deviceData.board.components.LED2_BLUE;
+// Name - The C/C++ identifier used in applications as the index parameter passed to GPIO runtime APIs
+GPIO1.$name = "GATE_SENSOR_LED_BLUE";
 // Name - The C/C++ identifier used in applications as the index parameter passed to PWM runtime APIs
-PWM1.$name = "CONFIG_PWM_0";
+PWM1.$name = "GATE_PWM";
 // Name
 PWM1.timer.$name = "MyTIMER_A1";
 // Assign pin
 PWM1.timer.pwmPin.$assign = "boosterpack.3"; // P3.2
 // Name - The C/C++ identifier used in applications as the index parameter passed to PWM runtime APIs
-PWM2.$name = "CONFIG_PWM_1";
+PWM2.$name = "ROLLER_PWM";
 // Name
 PWM2.timer.$name = "MyTIMER_A1";
 // Assign pin
 PWM2.timer.pwmPin.$assign = "boosterpack.4"; // P3.3
-// Name - The C/C++ identifier used in applications as the index parameter passed to GPIO runtime APIs
-GPIO2.$name = "CONFIG_GPIO_1";
 // Use Hardware - Select the hardware to use, or 'none' to use available header pins
 GPIO2.$hardware = system.deviceData.board.components.LED2_RED;
+// Name - The C/C++ identifier used in applications as the index parameter passed to GPIO runtime APIs
+GPIO2.$name = "OVERRUN_LED_RED";
+// Mode - Select the GPIO mode
+GPIO3.mode = "Output";
+// Name - The C/C++ identifier used in applications as the index parameter passed to GPIO runtime APIs
+GPIO3.$name = "PICKUP_NOW_PIN";
+// Assign pin
+GPIO3.gpioPin.$assign = "boosterpack.19"; // P2.5
+// Name - The C/C++ identifier used in applications as the index parameter passed to ADC runtime APIs
+ADC2.$name = "ROLLER_SENSOR_ADC";
+// Name
+ADC2.adc.$name = "MyADC141";
+// Assign pin
+ADC2.adc.adcPin.$assign = "boosterpack.6"; // P4.3
+// Use Hardware - Select the hardware to use, or 'none' to use available header pins
+GPIO4.$hardware = system.deviceData.board.components.LED2_GREEN;
+// Name - The C/C++ identifier used in applications as the index parameter passed to GPIO runtime APIs
+GPIO4.$name = "ROLLER_SENSOR_LED_GREEN";
 // Suggest solution
 RTOS.timer0.resource.$suggestSolution = "Timer_A0";
 // Suggest solution
@@ -63,3 +82,7 @@ PWM1.timer.$suggestSolution = "Timer_A1";
 PWM2.timer.$suggestSolution = "Timer_A1";
 // Suggest solution
 GPIO2.gpioPin.$suggestSolution = "16";
+// Suggest solution
+ADC2.adc.$suggestSolution = "ADC14";
+// Suggest solution
+GPIO4.gpioPin.$suggestSolution = "17";
